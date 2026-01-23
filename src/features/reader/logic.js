@@ -260,7 +260,9 @@ window.PocketReaderLogic = (function () {
         dom.fontSlider.addEventListener('input', (e) => {
             applyFontSize(e.target.value);
         });
-        return { init };
-    }) ();
+    }
+
+    return { init };
+})();
 
 // document.addEventListener('DOMContentLoaded', init); // Moved to Gatekeeper
