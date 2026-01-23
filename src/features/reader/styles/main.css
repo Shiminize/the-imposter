@@ -1,0 +1,526 @@
+@import 'colors.css';
+
+/* Pocket Reader - Cinematic Styles */
+
+/* CSS Variables from Design Skill */
+:root {
+    /* Colors - Mapped from colors.css (Cozy Cafe Palette) */
+    --bg-color: var(--color-latte);
+    --text-color: var(--color-cocoa-black);
+    --text-secondary: var(--color-espresso);
+
+    /* UI Elements */
+    --ui-bg: var(--bg-panel);
+    --ui-border: var(--color-evergreen);
+    --accent: var(--color-rosewood);
+
+    /* Typography */
+    --font-body: 'Merriweather', 'Georgia', serif;
+    --font-ui: 'Work Sans', -apple-system, system-ui, sans-serif;
+
+    /* Safe Area */
+    --sat: env(safe-area-inset-top);
+    --sab: env(safe-area-inset-bottom);
+}
+
+[data-theme="dark"] {
+    --bg-color: var(--color-cocoa-black);
+    --text-color: var(--color-cream);
+    /* Optimized for reading */
+    --text-secondary: var(--color-latte);
+    /* Slightly less opacity handled by use context usually, or same */
+    --ui-bg: var(--color-espresso);
+    --bg-panel: var(--color-espresso);
+    /* Fix for Dark Mode Menu BG */
+    --ui-border: var(--color-rosewood);
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--ui-bg);
+    /* Use Panel Color as requested */
+    color: var(--text-color);
+    font-family: var(--font-body);
+    transition: background-color 0.4s ease, color 0.4s ease;
+    overflow-x: hidden;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+/* Reader Container */
+/* Reader Container */
+.reader-container {
+    width: 100vw;
+    min-height: 100vh;
+    /* Allow growth */
+    display: block;
+    /* Flow naturally */
+    /* Remove fixed centering/overflow */
+    padding-bottom: calc(var(--sab) + 80px);
+    /* More space for controls */
+}
+
+/* Book & Page Styles */
+/* Book & Page Styles */
+.book {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    /* Clean Slide System */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* Slide Animations */
+@keyframes slideInRight {
+    from {
+        transform: translateX(50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.slide-next {
+    animation: slideInRight 0.4s cubic-bezier(0.2, 0.8, 0.2, 1.0) forwards;
+}
+
+.slide-prev {
+    animation: slideInLeft 0.4s cubic-bezier(0.2, 0.8, 0.2, 1.0) forwards;
+}
+
+.page {
+    /* Full Width / No Card Style */
+    width: 100%;
+    max-width: 800px;
+    /* Keep text readable */
+    min-height: 100vh;
+    /* Full height */
+    background-color: transparent;
+    /* No card bg */
+    box-shadow: none;
+    /* No shadow */
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    margin: 0 auto;
+    border-radius: 0;
+    overflow: visible;
+    /* Let content flow */
+}
+
+.page-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 3rem 2.5rem;
+    /* Generous padding from skill */
+}
+
+/* Mobile Tweaks */
+@media (max-width: 600px) {
+    .page-content {
+        padding: 1.5rem;
+    }
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+}
+
+.page-header h1 {
+    font-family: var(--font-ui);
+    font-weight: 500;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.page-text {
+    font-family: var(--font-body);
+    font-size: var(--dynamic-font-size, 1.125rem);
+    /* Persistent Size */
+    line-height: 1.8;
+    color: var(--text-color);
+    text-align: left;
+
+    /* Remove internal scroll */
+    overflow-y: visible;
+    flex-grow: 0;
+    /* Don't force stretch */
+    height: auto;
+
+    text-align: justify;
+}
+
+.page-text::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+}
+
+.page-text p {
+    margin-bottom: 1.5em;
+    /* from skill */
+}
+
+.page-footer {
+    text-align: center;
+    margin-top: 15px;
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    opacity: 0.8;
+    flex-shrink: 0;
+}
+
+.chapter-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.chapter-header h1 {
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin: 0;
+}
+
+.content-area {
+    font-size: 18px;
+    /* Default, overridden by JS */
+    line-height: 1.8;
+    text-align: left;
+}
+
+.content-area p {
+    margin-bottom: 1.5em;
+}
+
+.end-of-chapter {
+    text-align: center;
+    margin-top: 60px;
+    color: var(--accent);
+    opacity: 0.5;
+}
+
+/* UI Controls */
+.controls-bar {
+    position: fixed;
+    bottom: calc(20px + var(--sab));
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    background: var(--color-evergreen);
+    /* Requested Evergreen */
+    color: var(--text-inverse);
+    /* Contrast text */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: none;
+    border-radius: 12px;
+    /* Soft rounded corners */
+    /* Small radius */
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    transition: transform 0.3s ease;
+}
+
+/* Hide controls on scroll down (handled by JS class) */
+.controls-bar.hidden {
+    transform: translate(-50%, 150%);
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-color);
+    padding: 8px;
+    border-radius: 4px;
+    /* Small radius */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s;
+}
+
+/* Force contrast in controls */
+.controls-bar .icon-btn {
+    color: var(--text-inverse);
+}
+
+.controls-bar .progress-indicator {
+    color: var(--text-inverse);
+}
+
+.icon-btn:active {
+    opacity: 0.6;
+}
+
+.progress-indicator {
+    font-family: var(--font-ui);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+/* Settings Panel */
+.settings-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 200;
+    display: flex;
+    justify-content: flex-end;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s;
+}
+
+.settings-panel.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.settings-content {
+    width: 85%;
+    max-width: 320px;
+    background: var(--bg-color);
+    height: 100%;
+    padding: 24px;
+    padding-top: calc(var(--sat) + 20px);
+    overflow-y: auto;
+    /* Scrollable menu */
+    box-shadow: -5px 0 30px rgba(0, 0, 0, 0.2);
+    transform: translateX(0);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.settings-panel.hidden .settings-content {
+    transform: translateX(100%);
+}
+
+.setting-group label {
+    display: block;
+    font-family: var(--font-ui);
+    font-size: 0.9rem;
+    color: var(--accent);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.theme-toggles {
+    display: flex;
+    gap: 10px;
+}
+
+.theme-btn {
+    flex: 1;
+    padding: 12px;
+    padding: 12px;
+    border: none;
+    background: var(--ui-bg);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    color: var(--text-color);
+    border-radius: 4px;
+    /* Small radius */
+    font-family: var(--font-ui);
+    cursor: pointer;
+    border: 2px solid transparent;
+    /* Prepare for active border */
+    transition: transform 0.2s;
+}
+
+/* Language Button specific styles */
+.lang-btn {
+    background-color: var(--ui-bg);
+    color: var(--text-color);
+    border: 1px solid var(--ui-border);
+}
+
+.lang-btn.active {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+    border-color: var(--text-color);
+}
+
+/* Light Button Preview */
+.theme-btn[data-theme="light"] {
+    background-color: var(--color-latte);
+    color: var(--color-cocoa-black);
+}
+
+/* Dark Button Preview */
+.theme-btn[data-theme="dark"] {
+    background-color: var(--color-cocoa-black);
+    color: var(--color-latte);
+}
+
+.theme-btn.active {
+    /* Active state indicated by border, not color swap */
+    border-color: var(--color-rosewood);
+    transform: scale(0.98);
+}
+
+.toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.toc-list li {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--ui-border);
+    font-family: var(--font-ui);
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.toc-list li.active {
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.close-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--interactive-main);
+    color: var(--text-inverse);
+    border: none;
+    border-radius: 4px;
+    /* Small radius */
+    font-family: var(--font-ui);
+    font-weight: 600;
+    /* color: var(--text-color); Removed in favor of text-inverse */
+    cursor: pointer;
+}
+
+/* Menu Tag - The visual anchor */
+.menu-tag {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 60px;
+    background-color: var(--ui-tag-bg);
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, width 0.3s ease;
+}
+
+.menu-tag:hover {
+    background-color: var(--color-espresso);
+}
+
+.menu-tag-icon {
+    color: var(--text-inverse);
+    font-size: 24px;
+}
+
+/* Settings Drawer - The sliding panel */
+.settings-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 320px;
+    height: 100vh;
+    background-color: var(--bg-panel);
+    z-index: 999;
+    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.15);
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    padding: 20px;
+    padding-top: calc(var(--sat) + 20px);
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-drawer.open {
+    transform: translateX(0);
+}
+
+.settings-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 998;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(2px);
+}
+
+.settings-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
