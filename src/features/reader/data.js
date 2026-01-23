@@ -5,8 +5,8 @@ PocketReader.bookContent = [
         chapter: 0,
         title: "COVER",
         title_cn: "封面",
-        content: `<img src="src/assets/images/cover.png" class="cover-img" alt="Book Cover">`,
-        content_cn: `<img src="src/assets/images/cover.png" class="cover-img" alt="Book Cover">`
+        content: `<img src="src/assets/images/cover.jpg" class="cover-img" alt="Book Cover">`,
+        content_cn: `<img src="src/assets/images/cover.jpg" class="cover-img" alt="Book Cover">`
     },
     {
         chapter: 1,
