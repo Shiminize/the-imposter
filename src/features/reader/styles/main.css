@@ -524,3 +524,18 @@ body {
     opacity: 1;
     visibility: visible;
 }
+
+/* Mobile Optimizations */
+@media (max-width: 600px) {
+    .menu-tag {
+        width: 20px;
+        height: 50px;
+        /* Slightly shorter */
+    }
+
+    .menu-tag-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+    }
+}
