@@ -10,7 +10,7 @@
     --text-secondary: var(--color-espresso);
 
     /* UI Elements */
-    --bg-panel: var(--color-latte);
+    --bg-panel: #F4F1EA;
     --ui-bg: var(--bg-panel);
     --ui-border: var(--color-evergreen);
     --ui-tag-bg: var(--color-espresso);
@@ -521,6 +521,7 @@ body {
     padding-top: calc(var(--sat) + 20px);
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
 }
 
 .settings-drawer.open {
