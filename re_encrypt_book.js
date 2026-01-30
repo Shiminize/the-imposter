@@ -59,7 +59,10 @@ function encryptBook(bookName, languageFiles, images = {}) {
         });
     }
 
-    const targetParagraph = "She reached the bridge over the canal. It was a rusted iron structure that vibrated every time a truck passed. She leaned against the railing and looked down at the water. It was black and moved with a heavy, slow intent, carrying the debris of the city toward the sea.";
+    const lastSceneParagraph = "She reached the bridge over the canal. It was a rusted iron structure that vibrated every time a truck passed. She leaned against the railing and looked down at the water. It was black and moved with a heavy, slow intent, carrying the debris of the city toward the sea.";
+
+    // Exact paragraph from text to ensure match
+    const bodyGeographyParagraph = "She leaned in, her mouth leaving his just long enough to move to his ear. Her voice was low, a whisper that barely disturbed the air.";
 
     // --- Process Chapters ---
     titles.forEach((title, i) => {
@@ -76,10 +79,17 @@ function encryptBook(bookName, languageFiles, images = {}) {
         }
 
         // --- Precise Image Injection ---
-        if (images && images.lastScene && chapterObj.content.includes(targetParagraph)) {
-            // Inject after the target paragraph
+
+        // Last Scene Image
+        if (images && images.lastScene && chapterObj.content.includes(lastSceneParagraph)) {
             const injectionHtml = `\n\n<div class="end-scene"><img src="${images.lastScene}" alt="End Scene" class="scene-img"></div>\n\n`;
-            chapterObj.content = chapterObj.content.replace(targetParagraph, targetParagraph + injectionHtml);
+            chapterObj.content = chapterObj.content.replace(lastSceneParagraph, lastSceneParagraph + injectionHtml);
+        }
+
+        // Body of Geography Image
+        if (images && images.bodyGeography && chapterObj.content.includes(bodyGeographyParagraph)) {
+            const injectionHtml = `\n\n<div class="scene-wrapper"><img src="${images.bodyGeography}" alt="The Geography of the Body" class="scene-img"></div>\n\n`;
+            chapterObj.content = chapterObj.content.replace(bodyGeographyParagraph, bodyGeographyParagraph + injectionHtml);
         }
 
         if (otherLangs['cn']) {
@@ -110,5 +120,6 @@ encryptBook('TheFrictionOfTheSpark', {
     en: 'en.txt'
 }, {
     cover: 'Content/TheFrictionOfTheSpark/images/cover.jpg',
-    lastScene: 'Content/TheFrictionOfTheSpark/images/last_scene.jpg'
+    lastScene: 'Content/TheFrictionOfTheSpark/images/last_scene.jpg',
+    bodyGeography: 'Content/TheFrictionOfTheSpark/images/body_of_geography.jpg'
 });
