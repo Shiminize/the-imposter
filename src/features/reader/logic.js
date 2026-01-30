@@ -67,6 +67,7 @@ window.PocketReaderLogic = (function () {
         // This ensures the raw text data is properly organized for HTML rendering
         if (content) {
             content = content
+                .replace(/\r\n/g, '\n') // Normalize CRLF to LF
                 .split(/\n\n+/) // Split by 2 or more newlines
                 .map(para => para.trim())
                 .filter(para => para.length > 0)
