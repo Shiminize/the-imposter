@@ -59,6 +59,8 @@ function encryptBook(bookName, languageFiles, images = {}) {
         });
     }
 
+    const targetParagraph = "She reached the bridge over the canal. It was a rusted iron structure that vibrated every time a truck passed. She leaned against the railing and looked down at the water. It was black and moved with a heavy, slow intent, carrying the debris of the city toward the sea.";
+
     // --- Process Chapters ---
     titles.forEach((title, i) => {
         const chapterObj = {
@@ -73,9 +75,11 @@ function encryptBook(bookName, languageFiles, images = {}) {
             chapterObj.content = chapterObj.content.substring(title.length).trim();
         }
 
-        // Inject Last Scene into Last Chapter
-        if (i === titles.length - 1 && images && images.lastScene) {
-            chapterObj.content += `<div class="end-scene"><img src="${images.lastScene}" alt="End Scene" class="scene-img"></div>`;
+        // --- Precise Image Injection ---
+        if (images && images.lastScene && chapterObj.content.includes(targetParagraph)) {
+            // Inject after the target paragraph
+            const injectionHtml = `\n\n<div class="end-scene"><img src="${images.lastScene}" alt="End Scene" class="scene-img"></div>\n\n`;
+            chapterObj.content = chapterObj.content.replace(targetParagraph, targetParagraph + injectionHtml);
         }
 
         if (otherLangs['cn']) {
