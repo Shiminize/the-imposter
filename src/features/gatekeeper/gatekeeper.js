@@ -9,7 +9,7 @@ window.Gatekeeper = (function () {
 
     function getBookName() {
         const params = new URLSearchParams(window.location.search);
-        return params.get('book') || 'TheStructuralIntegrityOfWalls';
+        return params.get('book') || 'TheFrictionOfTheSpark';
     }
 
     function loadScript(src) {
