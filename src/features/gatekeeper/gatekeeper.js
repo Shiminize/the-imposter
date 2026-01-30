@@ -7,9 +7,31 @@ window.Gatekeeper = (function () {
 
     let encryptedData = null;
 
-    function init() {
-        // Find encrypted data
-        encryptedData = window.PocketReader.encryptedContent;
+    function getBookName() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('book') || 'TheStructuralIntegrityOfWalls';
+    }
+
+    function loadScript(src) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+
+    async function init() {
+        const bookName = getBookName();
+
+        // Dynamically load book data from centralized Content directory
+        try {
+            await loadScript(`Content/${bookName}/data.js`);
+            encryptedData = window.PocketReader.encryptedContent;
+        } catch (err) {
+            console.warn(`Gatekeeper: Failed to load data for book: ${bookName}. This book might not be configured yet.`);
+        }
 
         if (!encryptedData) {
             console.warn("Gatekeeper: No encrypted content found. Proceeding without gate.");
@@ -29,6 +51,8 @@ window.Gatekeeper = (function () {
 
     function renderLogin() {
         const overlay = document.getElementById(OVERLAY_ID);
+        if (!overlay) return;
+
         overlay.innerHTML = `
             <div class="login-card" id="login-card">
                 <h2>Protected Story</h2>
@@ -73,6 +97,16 @@ window.Gatekeeper = (function () {
 
             // Success! Inject content and start reader
             window.PocketReader.bookContent = content;
+
+            // Update Dynamic Title and Meta
+            const bookTitle = content[0]?.book_title || getBookName().replace(/([A-Z])/g, ' $1').trim();
+            document.title = bookTitle;
+            const themeColorMeta = document.getElementById('meta-theme-color');
+            if (themeColorMeta) {
+                // Default to antique paper color if not specified in book meta
+                themeColorMeta.setAttribute('content', content[0]?.theme_color || '#efe8d9');
+            }
+
             hideGate();
 
             // Initialize main reader logic
@@ -99,8 +133,10 @@ window.Gatekeeper = (function () {
 
     function hideGate() {
         const overlay = document.getElementById(OVERLAY_ID);
-        overlay.classList.add('hidden');
-        setTimeout(() => overlay.remove(), 500);
+        if (overlay) {
+            overlay.classList.add('hidden');
+            setTimeout(() => overlay.remove(), 500);
+        }
     }
 
     return { init };

@@ -3,19 +3,20 @@
 /* Pocket Reader - Cinematic Styles */
 
 /* CSS Variables from Design Skill */
+/* CSS Variables mapped from shared/styles/themes.css */
 :root {
-    /* Colors - Mapped from colors.css (Cozy Cafe Palette) */
-    --bg-color: var(--color-latte);
-    --text-color: var(--color-cocoa-black);
-    --text-secondary: var(--color-espresso);
+    /* Colors - Mapped from shared themes */
+    --bg-color: var(--color-bg-default);
+    --text-color: var(--color-text-primary);
+    --text-secondary: var(--color-text-secondary);
 
     /* UI Elements */
-    --bg-panel: #F4F1EA;
-    --ui-bg: var(--bg-panel);
-    --ui-border: var(--color-evergreen);
-    --ui-tag-bg: var(--color-espresso);
-    --accent: var(--color-rosewood);
-    --text-inverse: var(--color-cream);
+    --bg-panel: var(--color-bg-paper);
+    --ui-bg: var(--color-bg-paper);
+    --ui-border: var(--color-border);
+    --ui-tag-bg: var(--color-accent);
+    --accent: var(--color-accent);
+    --text-inverse: #FFFFFF;
 
     /* Typography */
     --font-body: 'Merriweather', 'Georgia', serif;
@@ -27,15 +28,13 @@
 }
 
 [data-theme="dark"] {
-    --bg-color: var(--color-cocoa-black);
-    --text-color: var(--color-cream);
-    /* Optimized for reading */
-    --text-secondary: var(--color-latte);
-    /* Slightly less opacity handled by use context usually, or same */
-    --ui-bg: var(--color-espresso);
-    --bg-panel: var(--color-espresso);
-    /* Fix for Dark Mode Menu BG */
-    --ui-border: var(--color-rosewood);
+    --bg-color: var(--color-bg-default);
+    --text-color: var(--color-text-primary);
+    --text-secondary: var(--color-text-secondary);
+    --ui-bg: var(--color-bg-paper);
+    --bg-panel: var(--color-bg-paper);
+    --ui-border: var(--color-border);
+    --accent: var(--color-accent);
 }
 
 * {
