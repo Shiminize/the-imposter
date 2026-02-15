@@ -116,13 +116,46 @@ function formatBody(lines) {
     return lines.join('\n')
         .split(/\n\s*\n/) // Split by empty lines
         .map(p => {
-            const trimmed = p.trim();
+            let trimmed = p.trim();
             if (!trimmed) return '';
             if (trimmed === '<hr class="scene-break">') return trimmed;
+            if (trimmed.startsWith('<div class="part-header')) return trimmed; // Don't wrap headers
+
+            // Clean up email blockquote markers
+            if (trimmed.startsWith('>')) {
+                // Remove the > markers and extra whitespace
+                trimmed = trimmed.replace(/^>\s*/gm, '').trim();
+                // Optionally wrap in blockquote if it's clearly a quote, but for now just clean text per user request "symbols shouldn't exist"
+                // or maybe we should use <blockquote>? The user said "should not exist", implying the artifacts are ugly.
+                // Let's wrap in a styled span or just clean it. Given usage context (email), let's just strip the > char.
+                // Actually, let's keep it simple: formatting is good, raw chars are bad.
+            }
+
+            // Parse Markdown Inline Styles
+            trimmed = parseMarkdown(trimmed);
+
             return `<p>${trimmed.replace(/\n/g, ' ')}</p>`;
         })
         .filter(p => p)
         .join('\n');
+}
+
+function parseMarkdown(text) {
+    // Note: Basic parsing. Order matters.
+
+    // Bold: **text**
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    // Italics: *text* (and handle nested? no, simple regex)
+    text = text.replace(/\*([^\*]+)\*/g, '<em>$1</em>');
+
+    // Remove any remaining loose > if they were at start of lines but we processed block above?
+    // The splitting by \n\n means paragraphs. 
+    // If a paragraph handled newlines inside it (by .replace(/\n/g, ' ')), we might have > inside.
+    // Let's strip > that appear at start of what was a line.
+    text = text.replace(/(&gt;|>)\s*/g, '');
+
+    return text;
 }
 
 // Construct final data structure with Acts
