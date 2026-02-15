@@ -67,19 +67,33 @@ for (let i = 0; i < lines.length; i++) {
 
     if (chapterMatch) {
         // If we have collected content for a previous chapter, save it
-        if (chapterBuffer.length > 0 && currentChapter > 0) {
+        const hasContent = chapterBuffer.some(line => line.trim().length > 0);
+
+        if (currentChapter > 0 && hasContent) {
             chapters.push({
                 chapter: currentChapter,
-                title: currentChapterTitle, // Use the title we captured
+                title: currentChapterTitle,
                 content: formatBody(chapterBuffer)
             });
             chapterBuffer = [];
         }
 
         // Start new chapter
-        currentChapter = parseInt(chapterMatch[1], 10);
-        currentChapterTitle = chapterMatch[2] ? chapterMatch[2].trim() : `Chapter ${currentChapter}`;
-        console.log(`Found Chapter ${currentChapter}: ${currentChapterTitle}`);
+        const newChapterNum = parseInt(chapterMatch[1], 10);
+
+        // Check for duplicate header for same chapter (e.g. "Chapter 11", then "Chapter 11: Title")
+        // If we haven't accumulated content yet, just update the title.
+        if (newChapterNum === currentChapter && !hasContent) {
+            if (chapterMatch[2]) {
+                currentChapterTitle = chapterMatch[2].trim();
+                console.log(`Updated title for Chapter ${currentChapter}: ${currentChapterTitle}`);
+            }
+        } else {
+            currentChapter = newChapterNum;
+            currentChapterTitle = chapterMatch[2] ? chapterMatch[2].trim() : `Chapter ${currentChapter}`;
+            console.log(`Found Chapter ${currentChapter}: ${currentChapterTitle}`);
+        }
+
         continue; // Skip the header line itself in the content
     }
 
@@ -103,7 +117,7 @@ for (let i = 0; i < lines.length; i++) {
 }
 
 // Push the last chapter
-if (chapterBuffer.length > 0 && currentChapter > 0) {
+if (chapterBuffer.some(line => line.trim().length > 0) && currentChapter > 0) {
     chapters.push({
         chapter: currentChapter,
         title: currentChapterTitle,
@@ -205,38 +219,7 @@ chapters.sort((a, b) => a.chapter - b.chapter);
 
 let outputChapters = [...finalStructure];
 
-acts.forEach(act => {
-    // Check if we have chapters for this act
-    const actChapters = chapters.filter(c => c.chapter >= act.start && (acts.find(a => a.start > act.start) ? c.chapter < acts.find(a => a.start > act.start).start : true));
-
-    if (actChapters.length > 0) {
-        // Option B: Inline Part Title into the first chapter of the Act
-        // This avoids the "Part taking entire page" issue by making it a header.
-
-        let firstChapter = outputChapters.find(c => c.chapter === actChapters[0].chapter);
-        if (firstChapter) {
-            // Prepend the Part Title Card styles inline or just a header
-            const partHeader = `<div class="part-header-inline"><h3>${act.title}</h3><hr class="part-divider"></div>`;
-            firstChapter.content = partHeader + firstChapter.content;
-            firstChapter.content_cn = partHeader + firstChapter.content_cn;
-        }
-
-        // Add remaining chapters
-        actChapters.forEach(ch => {
-            // Check if already added (if it was the first one, we modified it in place in outputChapters? 
-            // Wait, outputChapters is initialized with finalStructure (Cover).
-            // We need to push the chapters to outputChapters.
-
-            // Logic correction: finalStructure only has Cover. 
-            // We need to push ALL chapters.
-            // If we modified `ch` in place, we can just push `ch`.
-
-            // The previous logic was pushing NEW objects. 
-            // Let's just push the chapters from our `chapters` array, 
-            // but identifying which one needs the header.
-        });
-    }
-});
+// Redundant loop removed
 
 // Re-build outputChapters from scratch to ensure correct order and no duplicates
 outputChapters = [...finalStructure];
