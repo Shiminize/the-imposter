@@ -23,14 +23,12 @@ window.Gatekeeper = (function () {
     }
 
     async function init() {
-        const bookName = getBookName();
-
-        // Dynamically load book data from centralized Content directory
+        // Load the generated book data directly
         try {
-            await loadScript(`Content/${bookName}/data.js`);
+            await loadScript('src/features/reader/data.js');
             encryptedData = window.PocketReader.encryptedContent;
         } catch (err) {
-            console.warn(`Gatekeeper: Failed to load data for book: ${bookName}. This book might not be configured yet.`);
+            console.warn(`Gatekeeper: Failed to load book data.`, err);
         }
 
         if (!encryptedData) {
