@@ -66,13 +66,19 @@ window.PocketReaderLogic = (function () {
         // Convert double newlines to <p> tags, and single newlines to <br> if they exist
         // This ensures the raw text data is properly organized for HTML rendering
         if (content) {
-            content = content
-                .replace(/\r\n/g, '\n') // Normalize CRLF to LF
-                .split(/\n\n+/) // Split by 2 or more newlines
-                .map(para => para.trim())
-                .filter(para => para.length > 0)
-                .map(para => `<p>${para.replace(/\n/g, '<br>')}</p>`)
-                .join('');
+            // Check if content is already HTML (starts with <)
+            if (content.trim().startsWith('<')) {
+                // Do nothing, assume pre-formatted HTML
+            } else {
+                // Convert raw text: double newlines to <p>, single to <br>
+                content = content
+                    .replace(/\r\n/g, '\n') // Normalize CRLF to LF
+                    .split(/\n\n+/) // Split by 2 or more newlines
+                    .map(para => para.trim())
+                    .filter(para => para.length > 0)
+                    .map(para => `<p>${para.replace(/\n/g, '<br>')}</p>`)
+                    .join('');
+            }
         }
 
         // 1. Create new page element

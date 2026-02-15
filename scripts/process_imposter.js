@@ -1,0 +1,235 @@
+const fs = require('fs');
+const path = require('path');
+
+const inputPath = path.join(__dirname, '../Content/THE_IMPOSTER/2026-02-16 04-36-42 the-resort-the-imposter.md');
+const outputPath = path.join(__dirname, '../src/features/reader/data.js');
+
+if (!fs.existsSync(inputPath)) {
+    console.error('Input file not found locally:', inputPath);
+    process.exit(1);
+}
+
+const rawContent = fs.readFileSync(inputPath, 'utf8');
+const lines = rawContent.split('\n');
+
+let cleanedLines = [];
+let currentChapter = 0;
+let capture = false;
+let chapterBuffer = [];
+let chapters = [];
+
+// Regex to identify chapter starts
+// Matches: "### Chapter 1: Title" or "#### Chapter 1"
+const chapterRegex = /^(?:#+)\s*Chapter\s*(\d+)(?::\s*(.*))?$/i;
+
+// Regex to identify unwanted headers
+// Matches: "#### Chapter 1 - Scene 2" or "#### ... (continued)"
+const unwantedHeaderRegex = /^(?:#+)\s*Chapter\s*\d+.*Scene\s*\d+/i;
+const continuedRegex = /\(continued\)/i;
+const sceneBreakRegex = /^\s*\*\s*\*\s*\*\s*$/;
+
+// Tana French style replacements (Global)
+// We are being conservative here to avoid breaking character voice.
+// Replacing obvious low-quality functional headers or meta-text.
+const replacers = [
+    { from: /In the previous chapter/gi, to: "Previously" }, // Meta-narrative breach
+];
+
+console.log(`Processing ${lines.length} lines...`);
+
+for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+
+    // 1. Skip unwanted headers
+    if (unwantedHeaderRegex.test(line)) {
+        console.log(`Skipping unwanted header line ${i + 1}: ${line}`);
+        continue;
+    }
+    if (continuedRegex.test(line) && (line.trim().startsWith('#') || line.trim().length < 50)) {
+        console.log(`Skipping continued marker line ${i + 1}: ${line}`);
+        continue;
+    }
+
+    // 2. Handle Scene Breaks
+    if (sceneBreakRegex.test(line) || line.trim() === '####') {
+        cleanedLines.push('<hr class="scene-break">');
+        continue;
+    }
+
+    // 3. Apply Style Replacements
+    replacers.forEach(rep => {
+        line = line.replace(rep.from, rep.to);
+    });
+
+    // 4. Chapter Detection
+    const invalidHeaderMatch = line.match(/^#+\s+/); // Detect any markdown header
+    const chapterMatch = line.match(chapterRegex);
+
+    if (chapterMatch) {
+        // If we have collected content for a previous chapter, save it
+        if (chapterBuffer.length > 0 && currentChapter > 0) {
+            chapters.push({
+                chapter: currentChapter,
+                title: currentChapterTitle, // Use the title we captured
+                content: formatBody(chapterBuffer)
+            });
+            chapterBuffer = [];
+        }
+
+        // Start new chapter
+        currentChapter = parseInt(chapterMatch[1], 10);
+        currentChapterTitle = chapterMatch[2] ? chapterMatch[2].trim() : `Chapter ${currentChapter}`;
+        console.log(`Found Chapter ${currentChapter}: ${currentChapterTitle}`);
+        continue; // Skip the header line itself in the content
+    }
+
+    // If it's another header (like Part I, or some sub-header not caught), we might want to keep it or skip it.
+    // The source text has "## I — THE GATHERING" which are Act markers, but we want to structure them manually in the data structure, 
+    // or include them as text. The user wants specific ACT structure in the logic, so we might strip these text headers to strictly control the UI.
+    if (invalidHeaderMatch && !chapterMatch) {
+        // E.g. "## I — THE GATHERING"
+        // Let's iterate and see what they are.
+        if (line.toLowerCase().includes('the gathering') || line.toLowerCase().includes('the unraveling') || line.toLowerCase().includes('the reckoning')) {
+            console.log(`Skipping Part header line ${i + 1}: ${line}`);
+            continue; // Skip, we will add Part info in the data structure
+        }
+    }
+
+    // 5. Accumulate Content
+    // Only start accumulating after Chapter 1 starts
+    if (currentChapter > 0) {
+        chapterBuffer.push(line);
+    }
+}
+
+// Push the last chapter
+if (chapterBuffer.length > 0 && currentChapter > 0) {
+    chapters.push({
+        chapter: currentChapter,
+        title: currentChapterTitle,
+        content: formatBody(chapterBuffer)
+    });
+}
+
+function formatBody(lines) {
+    // Join lines, split by double newlines for paragraphs
+    return lines.join('\n')
+        .split(/\n\s*\n/) // Split by empty lines
+        .map(p => {
+            const trimmed = p.trim();
+            if (!trimmed) return '';
+            if (trimmed === '<hr class="scene-break">') return trimmed;
+            return `<p>${trimmed.replace(/\n/g, ' ')}</p>`;
+        })
+        .filter(p => p)
+        .join('\n');
+}
+
+// Construct final data structure with Acts
+const finalStructure = [
+    {
+        chapter: 0,
+        title: "COVER",
+        title_cn: "The Imposter",
+        content: `<img src="src/assets/images/cover.png" class="cover-img" alt="The Imposter">`,
+        content_cn: `<img src="src/assets/images/cover.png" class="cover-img" alt="The Imposter">`
+    }
+];
+
+// Act I: 1-6
+// Act II: 7-12
+// Act III: 13-18
+
+// We can inject "PART X" divider chapters or just groupings.
+// The reader engine usually just takes a flat list of chapters.
+// The user request "Structure: ... Part I (Chapters 1-6)" implies we might need separator entries? 
+// Or just let the chapters flow. 
+// "Part I: THE GATHERING" being a title content entry vs a wrapper.
+// Comparing with data.sample.js:
+/*
+    {
+        chapter: 1,
+        title: "PART I: THE BEGINNING",  <-- This suggests the Part title is part of the chapter title?
+        ...
+    }
+*/
+// But existing reader usually has Chapter 1, Chapter 2.
+// Let's assume we want to insert Title Cards for the Acts?
+// Or just rename Chapter 1 to "ACT I - Chapter 1"? 
+// The implementation plan said:
+//   - `Part I: THE GATHERING` (Chapters 1-6).
+// This implies a grouping. 
+// I will insert "Part" Title Cards before the first chapter of each act.
+
+const acts = [
+    { start: 1, title: "PART I: THE GATHERING" },
+    { start: 7, title: "PART II: THE UNRAVELING" },
+    { start: 13, title: "PART III: THE RECKONING" }
+];
+
+// Sort chapters just in case
+chapters.sort((a, b) => a.chapter - b.chapter);
+
+let outputChapters = [...finalStructure];
+
+acts.forEach(act => {
+    // Check if we have chapters for this act
+    const actChapters = chapters.filter(c => c.chapter >= act.start && (acts.find(a => a.start > act.start) ? c.chapter < acts.find(a => a.start > act.start).start : true));
+
+    if (actChapters.length > 0) {
+        // Option B: Inline Part Title into the first chapter of the Act
+        // This avoids the "Part taking entire page" issue by making it a header.
+
+        let firstChapter = outputChapters.find(c => c.chapter === actChapters[0].chapter);
+        if (firstChapter) {
+            // Prepend the Part Title Card styles inline or just a header
+            const partHeader = `<div class="part-header-inline"><h3>${act.title}</h3><hr class="part-divider"></div>`;
+            firstChapter.content = partHeader + firstChapter.content;
+            firstChapter.content_cn = partHeader + firstChapter.content_cn;
+        }
+
+        // Add remaining chapters
+        actChapters.forEach(ch => {
+            // Check if already added (if it was the first one, we modified it in place in outputChapters? 
+            // Wait, outputChapters is initialized with finalStructure (Cover).
+            // We need to push the chapters to outputChapters.
+
+            // Logic correction: finalStructure only has Cover. 
+            // We need to push ALL chapters.
+            // If we modified `ch` in place, we can just push `ch`.
+
+            // The previous logic was pushing NEW objects. 
+            // Let's just push the chapters from our `chapters` array, 
+            // but identifying which one needs the header.
+        });
+    }
+});
+
+// Re-build outputChapters from scratch to ensure correct order and no duplicates
+outputChapters = [...finalStructure];
+
+chapters.forEach(ch => {
+    // Check if this chapter is the start of an Act
+    const act = acts.find(a => a.start === ch.chapter);
+    let finalContent = ch.content;
+
+    if (act) {
+        const partHeader = `<div class="part-header-inline"><h3>${act.title}</h3><hr class="part-divider"></div>`;
+        finalContent = partHeader + finalContent;
+    }
+
+    outputChapters.push({
+        chapter: ch.chapter,
+        title: `Chapter ${ch.chapter}: ${ch.title}`,
+        title_cn: `Chapter ${ch.chapter}: ${ch.title}`,
+        content: finalContent,
+        content_cn: finalContent
+    });
+});
+
+const fileContent = `// book.js - Generated Content for The Imposter
+PocketReader.bookContent = ${JSON.stringify(outputChapters, null, 4)};
+`;
+
+fs.writeFileSync(outputPath, fileContent);
+console.log(`Generated data.js with ${outputChapters.length} entries.`);
