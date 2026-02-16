@@ -183,63 +183,94 @@ const finalStructure = [
     }
 ];
 
-// Act I: 1-6
-// Act II: 7-12
-// Act III: 13-18
-
-// We can inject "PART X" divider chapters or just groupings.
-// The reader engine usually just takes a flat list of chapters.
-// The user request "Structure: ... Part I (Chapters 1-6)" implies we might need separator entries? 
-// Or just let the chapters flow. 
-// "Part I: THE GATHERING" being a title content entry vs a wrapper.
-// Comparing with data.sample.js:
-/*
-    {
-        chapter: 1,
-        title: "PART I: THE BEGINNING",  <-- This suggests the Part title is part of the chapter title?
-        ...
-    }
-*/
-// But existing reader usually has Chapter 1, Chapter 2.
-// Let's assume we want to insert Title Cards for the Acts?
-// Or just rename Chapter 1 to "ACT I - Chapter 1"? 
-// The implementation plan said:
-//   - `Part I: THE GATHERING` (Chapters 1-6).
-// This implies a grouping. 
-// I will insert "Part" Title Cards before the first chapter of each act.
-
+// Acts with Chinese Titles
 const acts = [
-    { start: 1, title: "PART I: THE GATHERING" },
-    { start: 7, title: "PART II: THE UNRAVELING" },
-    { start: 13, title: "PART III: THE RECKONING" }
+    { start: 1, title: "PART I: THE GATHERING", title_cn: "第一部：聚会" },
+    { start: 7, title: "PART II: THE UNRAVELING", title_cn: "第二部：真相" },
+    { start: 13, title: "PART III: THE RECKONING", title_cn: "第三部：清算" }
 ];
+
+// --- Parse Chinese Content ---
+const cnPath = path.join(__dirname, '../Content/THE_IMPOSTER/cn.md');
+let cnChapters = new Map();
+
+if (fs.existsSync(cnPath)) {
+    console.log('Found Chinese translation file. Parsing...');
+    const cnContent = fs.readFileSync(cnPath, 'utf8');
+    const cnLines = cnContent.split('\n');
+    let cnCurrentChap = 0;
+    let cnBuffer = [];
+    let cnTitle = "";
+
+    cnLines.forEach(line => {
+        // Detect Chapter: "## Chapter 1: ..."
+        const chapMatch = line.match(/^##\s*Chapter\s*(\d+)/i);
+        if (chapMatch) {
+            // Save previous
+            if (cnCurrentChap > 0 && cnBuffer.length > 0) {
+                cnChapters.set(cnCurrentChap, {
+                    title_cn: cnTitle,
+                    content_cn: formatBody(cnBuffer)
+                });
+                cnBuffer = [];
+            }
+            cnCurrentChap = parseInt(chapMatch[1], 10);
+            cnTitle = ""; // Reset title, look for title_cn line
+        } else if (line.trim().startsWith('title_cn:')) {
+            cnTitle = line.replace('title_cn:', '').trim();
+        } else if (cnCurrentChap > 0) {
+            cnBuffer.push(line);
+        }
+    });
+
+    // Save last
+    if (cnCurrentChap > 0 && cnBuffer.length > 0) {
+        cnChapters.set(cnCurrentChap, {
+            title_cn: cnTitle || `第 ${cnCurrentChap} 章`,
+            content_cn: formatBody(cnBuffer)
+        });
+    }
+    console.log(`Parsed ${cnChapters.size} translated chapters.`);
+} else {
+    console.log('No Chinese translation file found. Using English fallback.');
+}
 
 // Sort chapters just in case
 chapters.sort((a, b) => a.chapter - b.chapter);
 
 let outputChapters = [...finalStructure];
 
-// Redundant loop removed
-
-// Re-build outputChapters from scratch to ensure correct order and no duplicates
-outputChapters = [...finalStructure];
-
 chapters.forEach(ch => {
     // Check if this chapter is the start of an Act
     const act = acts.find(a => a.start === ch.chapter);
     let finalContent = ch.content;
 
+    // Default to English content for CN if missing
+    let finalContentCn = ch.content;
+    let finalTitleCn = ch.title; // Default to English title
+
+    // Override with translated content if available
+    if (cnChapters.has(ch.chapter)) {
+        const cnData = cnChapters.get(ch.chapter);
+        finalContentCn = cnData.content_cn;
+        finalTitleCn = cnData.title_cn;
+    }
+
     if (act) {
         const partHeader = `<div class="part-header-inline"><h3>${act.title}</h3><hr class="part-divider"></div>`;
         finalContent = partHeader + finalContent;
+
+        // Add CN Part Header
+        const partHeaderCn = `<div class="part-header-inline"><h3>${act.title_cn || act.title}</h3><hr class="part-divider"></div>`;
+        finalContentCn = partHeaderCn + finalContentCn;
     }
 
     outputChapters.push({
         chapter: ch.chapter,
         title: `Chapter ${ch.chapter}: ${ch.title}`,
-        title_cn: `Chapter ${ch.chapter}: ${ch.title}`,
+        title_cn: `Chapter ${ch.chapter}: ${finalTitleCn}`, // Keeping format consistent
         content: finalContent,
-        content_cn: finalContent
+        content_cn: finalContentCn
     });
 });
 
