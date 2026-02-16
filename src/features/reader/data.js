@@ -4,8 +4,8 @@ PocketReader.bookContent = [
         "chapter": 0,
         "title": "COVER",
         "title_cn": "The Imposter",
-        "content": "<img src=\"src/assets/images/cover.png\" class=\"cover-img\" alt=\"The Imposter\">",
-        "content_cn": "<img src=\"src/assets/images/cover.png\" class=\"cover-img\" alt=\"The Imposter\">"
+        "content": "<img src=\"src/assets/images/cover.jpg\" class=\"cover-img\" alt=\"The Imposter\">",
+        "content_cn": "<img src=\"src/assets/images/cover.jpg\" class=\"cover-img\" alt=\"The Imposter\">"
     },
     {
         "chapter": 1,
