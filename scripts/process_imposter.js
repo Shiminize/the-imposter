@@ -247,13 +247,15 @@ chapters.forEach(ch => {
 
     // Default to English content for CN if missing
     let finalContentCn = ch.content;
-    let finalTitleCn = ch.title; // Default to English title
+    let finalTitleCn = ch.title; // Default to English title (raw title "The Strained Dinner Party")
+    let isTranslated = false;
 
     // Override with translated content if available
     if (cnChapters.has(ch.chapter)) {
         const cnData = cnChapters.get(ch.chapter);
         finalContentCn = cnData.content_cn;
         finalTitleCn = cnData.title_cn;
+        isTranslated = true;
     }
 
     if (act) {
@@ -268,7 +270,7 @@ chapters.forEach(ch => {
     outputChapters.push({
         chapter: ch.chapter,
         title: `Chapter ${ch.chapter}: ${ch.title}`,
-        title_cn: `Chapter ${ch.chapter}: ${finalTitleCn}`, // Keeping format consistent
+        title_cn: isTranslated ? finalTitleCn : `Chapter ${ch.chapter}: ${finalTitleCn}`,
         content: finalContent,
         content_cn: finalContentCn
     });
