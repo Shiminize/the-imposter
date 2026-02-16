@@ -25,7 +25,8 @@ window.Gatekeeper = (function () {
     async function init() {
         // Load the generated book data directly
         try {
-            await loadScript('src/features/reader/data.js');
+            // Add timestamp to prevent caching of book data
+            await loadScript(`src/features/reader/data.js?v=${new Date().getTime()}`);
             encryptedData = window.PocketReader.encryptedContent;
         } catch (err) {
             console.warn(`Gatekeeper: Failed to load book data.`, err);
