@@ -28,6 +28,11 @@ window.PocketReaderLogic = (function () {
 
     // --- INITIALIZATION ---
     function init() {
+        // Initialize Analytics
+        if (window.Analytics) {
+            window.Analytics.init();
+        }
+
         loadProgress();
         renderChapter('none'); // Initial render, no animation
         setupEventListeners();
@@ -35,7 +40,23 @@ window.PocketReaderLogic = (function () {
         applyFontSize(state.fontSize);
         updateLangBtns(state.lang); // Visual update
         buildTOC();
+
+        // Track initial progress
+        trackReadingProgress();
+
         console.log("Pocket Reader Initialized (Slide Engine + i18n)");
+    }
+
+    // --- ANALYTICS HELPER ---
+    function trackReadingProgress() {
+        if (!window.Analytics) return;
+
+        const total = PocketReader.bookContent.length;
+        if (total === 0) return;
+
+        // Track specific chapter view for advanced analytics (Time on Page, Path, etc.)
+        // Logic will handle percentage calculation internally
+        window.Analytics.trackView(state.currentChapter, total);
     }
 
     // --- RENDER LOGIC (SLIDE SYSTEM) ---
@@ -45,6 +66,9 @@ window.PocketReaderLogic = (function () {
         const chapterData = bookContent[chapterIndex];
 
         if (!chapterData) return;
+
+        // Track progress whenever we render a new chapter
+        trackReadingProgress();
 
         // Determine Content Language
         let title, content;
