@@ -5,7 +5,7 @@ window.PocketReaderLogic = (function () {
         currentChapter: 1, // 1-based index
         fontSize: 18,
         theme: 'light',
-        lang: 'en', // 'en', 'cn', 'id', or 'ru'
+        lang: 'en', // 'en', 'cn', 'id', or 'fr'
         scrollPos: 0
     };
 
@@ -78,9 +78,9 @@ window.PocketReaderLogic = (function () {
         } else if (state.lang === 'id') {
             title = chapterData.title_id || chapterData.title;
             content = chapterData.content_id || chapterData.content;
-        } else if (state.lang === 'ru') {
-            title = chapterData.title_ru || chapterData.title;
-            content = chapterData.content_ru || chapterData.content;
+        } else if (state.lang === 'fr') {
+            title = chapterData.title_fr || chapterData.title;
+            content = chapterData.content_fr || chapterData.content;
         } else {
             title = chapterData.title;
             content = chapterData.content;
@@ -189,8 +189,8 @@ window.PocketReaderLogic = (function () {
             partLabel = chapterData.title_cn || chapterData.title;
         } else if (state.lang === 'id') {
             partLabel = chapterData.title_id || chapterData.title;
-        } else if (state.lang === 'ru') {
-            partLabel = chapterData.title_ru || chapterData.title;
+        } else if (state.lang === 'fr') {
+            partLabel = chapterData.title_fr || chapterData.title;
         } else {
             partLabel = chapterData.title;
         }
@@ -279,8 +279,8 @@ window.PocketReaderLogic = (function () {
                 title = chapter.title_cn || chapter.title;
             } else if (state.lang === 'id') {
                 title = chapter.title_id || chapter.title;
-            } else if (state.lang === 'ru') {
-                title = chapter.title_ru || chapter.title;
+            } else if (state.lang === 'fr') {
+                title = chapter.title_fr || chapter.title;
             } else {
                 title = chapter.title;
             }
